@@ -187,7 +187,7 @@ class DataModuleRNA(pl.LightningDataModule):
         for set_name, set in sample_dict.items():
             self.logger.info(f'Load preprocessed {set_name} {len(set)} samples')
 
-        self.train_samples = sample_dict['train'][:2]
+        self.train_samples = sample_dict['train'] #[:2]
         self.valid_minibatch_sampler = {}
         self.valid_samples_dict = {}
         for valid_name in self.valid_sets:

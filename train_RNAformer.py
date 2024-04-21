@@ -152,7 +152,7 @@ def main(cfg):
 
     logger.info(f"Starting training on rank {rank}")
     trainer.fit(
-        model=model_module, datamodule=data_module #, ckpt_path=cfg.resume_training
+        model=model_module, datamodule=data_module #, ckpt_path=cfg.trainer.resume_from_checkpoint
     )
 
     if is_rank_zero:

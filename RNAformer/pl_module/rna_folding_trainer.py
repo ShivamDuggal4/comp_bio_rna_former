@@ -105,6 +105,8 @@ class RNAFoldingTrainer(pl.LightningModule):
 
         self.log("global_step", torch.FloatTensor([self.global_step]))
 
+        if batch_idx%100==0: self.validation_step(batch, batch_idx)
+
         return {"loss": loss,
                 "mean_batch_length": torch.mean(batch['length'].to(torch.float)),
                 "batch_size": batch['length'].shape[0],
@@ -150,6 +152,19 @@ class RNAFoldingTrainer(pl.LightningModule):
                 metrics['f1_score'].append(f1_score)
                 metrics['mcc'].append(mcc)
 
+            import numpy as np
+            logger.info(
+                f"val/{self.val_sets_name[dataloader_idx]}/accuracy: {np.stack(metrics['accuracy']).mean()}"
+            )
+            logger.info(
+                f"val/{self.val_sets_name[dataloader_idx]}/f1_score: {np.stack(metrics['f1_score']).mean()}"
+            )
+            logger.info(
+                f"val/{self.val_sets_name[dataloader_idx]}/recall: {np.stack(metrics['recall']).mean()}"
+            )
+            logger.info(
+                f"val/{self.val_sets_name[dataloader_idx]}/precision: {np.stack(metrics['precision']).mean()}"
+            )
             self.log(
                 f"val/{self.val_sets_name[dataloader_idx]}/loss",
                 loss,
