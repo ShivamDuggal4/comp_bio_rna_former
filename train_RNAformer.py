@@ -127,10 +127,11 @@ def main(cfg):
 
     logger.info(f'#### Load strategy on rank {rank}')
     if cfg.trainer.devices == 1:
-        strategy = pl.strategies.DDPStrategy(
-            find_unused_parameters=True,
-            static_graph=True
-        )
+        # strategy = pl.strategies.DDPStrategy(
+        #     find_unused_parameters=False,
+        #     static_graph=True
+        # )
+        strategy = None # if this gives error, just comment strategy from "trainer = instantiate" line.
     else:
         strategy = pl.strategies.DeepSpeedStrategy(
             **cfg.deepspeed,
@@ -152,7 +153,7 @@ def main(cfg):
 
     logger.info(f"Starting training on rank {rank}")
     trainer.fit(
-        model=model_module, datamodule=data_module #, ckpt_path=cfg.trainer.resume_from_checkpoint
+        model=model_module, datamodule=data_module, ckpt_path=cfg.trainer.resume_from_checkpoint
     )
 
     if is_rank_zero:

@@ -4,6 +4,7 @@ import torch
 import inspect
 
 from RNAformer.model.RNAformer import RiboFormer
+# from RNAformer.model.RNAformer_cnn import RiboFormer
 from RNAformer.utils import instantiate
 from RNAformer.utils.group_parameters import group_parameters_for_optimizer
 from RNAformer.utils.optim.lr_schedule import get_learning_rate_schedule

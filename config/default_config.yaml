@@ -72,8 +72,8 @@ callbacks:
     _target_: pytorch_lightning.callbacks.ModelCheckpoint
     dirpath: ${experiment.experiments_base_dir}
     auto_insert_metric_name: False
-    every_n_train_steps: 10000
-    every_n_epochs: null
+    every_n_train_steps: null #10000
+    every_n_epochs: 1
     save_top_k: 1
     monitor: "step"
     mode: "max"

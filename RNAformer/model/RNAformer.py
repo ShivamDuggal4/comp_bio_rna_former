@@ -71,6 +71,7 @@ class RiboFormer(nn.Module):
             pair_latent = pair_latent + self.pdf_embedding(pdb_sample)[:, None, None, :]
 
         if self.cycling:
+            print('running cycles....')
             if self.training:
                 n_cycles = torch.randint(0, max_cycle + 1, [1])
                 if torch.distributed.is_initialized() and torch.distributed.get_world_size() > 1:

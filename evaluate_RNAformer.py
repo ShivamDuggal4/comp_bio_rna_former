@@ -132,6 +132,8 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
 
                 sequence = sample['src_seq'].unsqueeze(0).to(device)
                 src_len = torch.LongTensor([sequence.shape[-1]]).to(device)
+                # print(sequence.shape, "seqeunce shape check")
+                if src_len > 100: continue
 
                 # if torch.cuda.is_available():
                 #     if torch.cuda.is_bf16_supported():
@@ -180,7 +182,7 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
                 metrics['f1_score'].append(f1_score)
                 metrics['mcc'].append(mcc)
 
-                print('accuracy: {} | precision: {} | f1_score: {}'.format(accuracy, precision, f1_score))
+                print('sequence shape: {} | accuracy: {} | precision: {} | f1_score: {}'.format(sequence.shape, accuracy, precision, f1_score))
 
                 # if id==10: break
 
