@@ -74,7 +74,7 @@ callbacks:
     auto_insert_metric_name: False
     every_n_train_steps: null #10000
     every_n_epochs: 1
-    save_top_k: 1
+    save_top_k: -1
     monitor: "step"
     mode: "max"
     filename: "checkpoint-{epoch:02d}-{global_step}"

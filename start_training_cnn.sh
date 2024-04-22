@@ -26,4 +26,4 @@ rna_data.max_len=100 \
 experiment.experiments_base_dir=./workspace/experiments_cnn_cycles \
 RNAformer.cycling=6 \
 resume_training=True \
-trainer.resume_from_checkpoint=/data/vision/torralba/sduggal/course_work/bio_course_hw/project/RNAProject-self/workspace/experiments_cnn_cycles/RNAformer/rna_folding_1/ts0_conform_dim64_32bit-006/last.ckpt
+trainer.resume_from_checkpoint=/data/vision/torralba/sduggal/course_work/bio_course_hw/project/RNAProject-self/workspace/experiments_cnn_cycles/RNAformer/rna_folding_1/ts0_conform_dim64_32bit-017/checkpoint-09-4110.0.ckpt
