@@ -96,11 +96,11 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
     if torch.cuda.is_available():
         model = model.cuda()
 
-        # check GPU can do bf16
-        if torch.cuda.is_bf16_supported():
-            model = model.bfloat16()
-        else:
-            model = model.half()
+        # # check GPU can do bf16
+        # if torch.cuda.is_bf16_supported():
+        #     model = model.bfloat16()
+        # else:
+        #     model = model.half()
 
     model.eval()
 
@@ -115,10 +115,8 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
         eval_sets = ["pdb_ts1", "pdb_ts2", "pdb_ts3", "pdb_ts_hard"]
 
     with torch.no_grad():
-        print("hello 1")
         for test_set, df in test_sets.items():
-            print("hello 2")
-
+        
             if test_set not in eval_sets:
                 continue
 
@@ -130,27 +128,29 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
             inference_samples = []
 
             for id, sample_raw in tqdm(test_df.iterrows(), total=len(test_df)):
-                print("hello 3")
                 sample = prepare_RNA_sample(sample_raw)
 
                 sequence = sample['src_seq'].unsqueeze(0).to(device)
                 src_len = torch.LongTensor([sequence.shape[-1]]).to(device)
 
-                if torch.cuda.is_available():
-                    if torch.cuda.is_bf16_supported():
-                        pdb_sample = torch.FloatTensor([[1]]).bfloat16().cuda()
-                    else:
-                        pdb_sample = torch.FloatTensor([[1]]).half().cuda()
-                else:
-                     pdb_sample = torch.FloatTensor([[1]]).to(device)
+                # if torch.cuda.is_available():
+                #     if torch.cuda.is_bf16_supported():
+                #         pdb_sample = torch.FloatTensor([[1]]).bfloat16().cuda()
+                #     else:
+                #         pdb_sample = torch.FloatTensor([[1]]).half().cuda()
+                #     assert(False)
+                # else:
+                #     print('no half precision')
+                #     pdb_sample = torch.FloatTensor([[1]]).to(device)
+                pdb_sample = torch.FloatTensor([[1]]).to(device)
                 logits, pair_mask = model(sequence, src_len, pdb_sample)
 
                 pred_mat = torch.sigmoid(logits[0, :, :, -1]) > 0.5
                 true_mat = sample['trg_mat'].float().to(device)
-                import ipdb; ipdb.set_trace()
+                # import ipdb; ipdb.set_trace()
 
-                print(pred_mat, "pred_mat")
-                print(true_mat, "true_mat")
+                # print(pred_mat, "pred_mat")
+                # print(true_mat, "true_mat")
                 
                 save_sample = {}
                 for nkey in ['sequence', 'pk', 'has_multiplet', 'has_pk', 'set', 'has_nc']:
@@ -182,7 +182,7 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
 
                 print('accuracy: {} | precision: {} | f1_score: {}'.format(accuracy, precision, f1_score))
 
-                if id==10: break
+                # if id==10: break
 
             num_samples = len(metrics['mcc'])
             for key, value_list in metrics.items():
@@ -225,9 +225,11 @@ if __name__ == '__main__':
     else:
         state_dict = torch.load(args.state_dict, map_location=torch.device('cpu'))
 
-    model_state_dict = state_dict['state_dict']
+    # print(state_dict.keys())
+    model_state_dict = state_dict["module"] #['state_dict']
+    # print(model_state_dict)
     # remove prefix "model." from the model_state_dict
-    model_state_dict = {k.replace("model.", ""): v for k, v in model_state_dict.items()}
+    model_state_dict = {k.replace("_forward_module.model.", ""): v for k, v in model_state_dict.items()}
     model.load_state_dict(model_state_dict, strict=True)
     # model.load_state_dict(state_dict, strict=True)
 

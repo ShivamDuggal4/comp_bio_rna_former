@@ -27,7 +27,7 @@ trainer:
   precision: 16
   reload_dataloaders_every_n_epochs: 1
   replace_sampler_ddp: false
-  resume_from_checkpoint: null
+  resume_from_checkpoint: null #workspace/experiments/RNAformer/rna_folding_1/ts0_conform_dim64_32bit-024/last.ckpt
   track_grad_norm: -1
   val_check_interval: 100
 

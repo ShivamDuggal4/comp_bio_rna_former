@@ -154,16 +154,16 @@ class RNAFoldingTrainer(pl.LightningModule):
 
             import numpy as np
             logger.info(
-                f"val/{self.val_sets_name[dataloader_idx]}/accuracy: {np.stack(metrics['accuracy']).mean()}"
+                f"val/{self.val_sets_name[dataloader_idx]}/accuracy: {torch.stack(metrics['accuracy']).detach().cpu().mean()}"
             )
             logger.info(
-                f"val/{self.val_sets_name[dataloader_idx]}/f1_score: {np.stack(metrics['f1_score']).mean()}"
+                f"val/{self.val_sets_name[dataloader_idx]}/f1_score: {torch.stack(metrics['f1_score']).detach().cpu().mean()}"
             )
             logger.info(
-                f"val/{self.val_sets_name[dataloader_idx]}/recall: {np.stack(metrics['recall']).mean()}"
+                f"val/{self.val_sets_name[dataloader_idx]}/recall: {torch.stack(metrics['recall']).detach().cpu().mean()}"
             )
             logger.info(
-                f"val/{self.val_sets_name[dataloader_idx]}/precision: {np.stack(metrics['precision']).mean()}"
+                f"val/{self.val_sets_name[dataloader_idx]}/precision: {torch.stack(metrics['precision']).detach().cpu().mean()}"
             )
             self.log(
                 f"val/{self.val_sets_name[dataloader_idx]}/loss",
