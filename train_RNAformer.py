@@ -147,7 +147,7 @@ def main(cfg):
     trainer = instantiate(cfg.trainer, instance=pl.Trainer,
                           callbacks=callbacks,
                           plugins=plugins,
-                        #   strategy=strategy,
+                          #strategy=strategy,
                           logger=training_logger,
                           )
 
