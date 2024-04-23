@@ -9,6 +9,7 @@ import torch.cuda
 import pandas as pd
 import loralib as lora
 
+# from RNAformer.model.RNAformer_cnn import RiboFormer
 from RNAformer.model.RNAformer import RiboFormer
 from RNAformer.utils.configuration import Config
 
@@ -227,12 +228,13 @@ if __name__ == '__main__':
     else:
         state_dict = torch.load(args.state_dict, map_location=torch.device('cpu'))
 
-    # print(state_dict.keys())
+    # print(state_dict["state_dict"].keys())
     model_state_dict = state_dict["module"] #['state_dict']
     # print(model_state_dict)
     # remove prefix "model." from the model_state_dict
     model_state_dict = {k.replace("_forward_module.model.", ""): v for k, v in model_state_dict.items()}
-    model.load_state_dict(model_state_dict, strict=True)
+    # model_state_dict = {k.replace("model.", ""): v for k, v in model_state_dict.items()}
+    model.load_state_dict(model_state_dict, strict=False)
     # model.load_state_dict(state_dict, strict=True)
 
     if args.cycling and args.cycling > 0:

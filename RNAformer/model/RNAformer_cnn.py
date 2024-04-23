@@ -267,7 +267,7 @@ class RiboFormer(nn.Module):
             pair_latent = pair_latent + self.pdf_embedding(pdb_sample)[:, None, None, :]
             
         latent = pair_latent
-        # latent = self.resnet(latent)
+        # latent = self.resnet(latent) # uncomment this and comment everything below till output_mat for resnt with cycles.
 
         if self.cycling:
             if self.training:
