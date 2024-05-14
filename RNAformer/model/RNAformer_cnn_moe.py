@@ -225,7 +225,20 @@ class RiboFormer(nn.Module):
         # self.sigmoid = nn.Sigmoid()
         # self.log_softmax = nn.LogSoftmax(dim=-1)
 
-        self.resnet = ResNet(BasicBlock, layers=[2,2,2,2])
+        self.resnet_1 = ResNet(BasicBlock, layers=[2,2,2,2])
+        self.resnet_2 = ResNet(BasicBlock, layers=[2,2,2,2])
+        self.resnet_3 = ResNet(BasicBlock, layers=[2,2,2,2])
+        self.resnet_list = nn.ModuleList([
+            self.resnet_1, self.resnet_2,self.resnet_3
+        ])
+        self.router = nn.Sequential(
+            nn.Linear(256, 64),
+            nn.ReLU(),
+            nn.Linear(64, 3),
+            nn.ReLU()
+        )
+        # torch.nn.init.constant_(self.router[2].weight, 0)
+        # torch.nn.init.constant_(self.router[2].bias, 0)
         self.initialize(initializer_range=config.initializer_range)
 
     def initialize(self, initializer_range):
@@ -261,7 +274,7 @@ class RiboFormer(nn.Module):
     def forward(self, src_seq, src_len, pdb_sample, max_cycle=0):
 
         pair_mask = self.make_pair_mask(src_seq, src_len)
-        pair_latent, _ = self.seq2mat_embed(src_seq)
+        pair_latent, seq_latent = self.seq2mat_embed(src_seq)
         
         if self.use_pdb:
             pair_latent = pair_latent + self.pdf_embedding(pdb_sample)[:, None, None, :]
@@ -269,25 +282,37 @@ class RiboFormer(nn.Module):
         # latent = pair_latent
         # latent = self.resnet(pair_latent) # uncomment this and comment everything below till output_mat for resnt with cycles.
 
-        if self.cycling:
-            if self.training:
-                n_cycles = torch.randint(0, max_cycle + 1, [1])
-                n_cycles = n_cycles.item()
+        router_out = self.router(seq_latent).mean(dim=1)
+        router_prob = torch.nn.functional.softmax(router_out, dim=-1)
+        router_sample = torch.multinomial(router_prob, num_samples=1)
+        print(router_prob[0], 'router_prob')
+        print(router_prob[25], 'router_prob')
+        for module_id in range(3):
+            if module_id==0:
+                latent = self.resnet_list[module_id](pair_latent) * router_prob[:, module_id][:,None,None,None]
+                latent = latent[:,None]
             else:
-                n_cycles = self.cycle_steps
-
-            print('running cycles: ', n_cycles)
-            cyc_latent = torch.zeros_like(pair_latent)
-            for n in range(n_cycles - 1):
-                res_latent = pair_latent.detach() + self.recycle_pair_norm(cyc_latent.detach()).detach()
-                print(n, ' th cycle run with layernorm.')
-                cyc_latent = self.cycle_resnet(res_latent) 
-
-        pair_latent = pair_latent + self.recycle_pair_norm(cyc_latent.detach())
-        latent = self.resnet(pair_latent) # + latent.detach()      
-        logits = self.output_mat(latent)
+                latent = torch.cat((latent, (self.resnet_list[module_id](pair_latent) * router_prob[:, module_id][:,None,None,None])[:,None]), dim=1) 
+        latent = torch.gather(latent, index=router_sample[:,0][:,None,None,None,None].repeat(1, 1, latent.shape[2], latent.shape[3], latent.shape[4]), dim=1)[:,0]
         
-        return logits, pair_mask
+        # if self.cycling:
+        #     if self.training:
+        #         n_cycles = torch.randint(0, max_cycle + 1, [1])
+        #         n_cycles = n_cycles.item()
+        #     else:
+        #         n_cycles = self.cycle_steps
+
+        #     print('running cycles: ', n_cycles)
+        #     cyc_latent = torch.zeros_like(pair_latent)
+        #     for n in range(n_cycles - 1):
+        #         res_latent = pair_latent.detach() + self.recycle_pair_norm(cyc_latent.detach()).detach()
+        #         print(n, ' th cycle run with layernorm.')
+        #         cyc_latent = self.cycle_resnet(res_latent) 
+
+        # pair_latent = pair_latent + self.recycle_pair_norm(cyc_latent.detach())
+        # latent = self.resnet(pair_latent) # + latent.detach()      
+        logits = self.output_mat(latent)
+        return logits, pair_mask, router_prob
 
         # latent = pair_latent
         # if self.cycling:

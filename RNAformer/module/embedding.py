@@ -95,4 +95,4 @@ class EmbedSequence2Matrix(nn.Module):
 
         pair_latent = self.norm(pair_latent)
 
-        return pair_latent
+        return pair_latent, seq_1_embed

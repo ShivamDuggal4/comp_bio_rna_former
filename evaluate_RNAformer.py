@@ -9,8 +9,8 @@ import torch.cuda
 import pandas as pd
 import loralib as lora
 
-# from RNAformer.model.RNAformer_cnn import RiboFormer
-from RNAformer.model.RNAformer import RiboFormer
+from RNAformer.model.RNAformer_cnn import RiboFormer
+# from RNAformer.model.RNAformer import RiboFormer
 from RNAformer.utils.configuration import Config
 
 logger = logging.getLogger(__name__)
@@ -147,6 +147,7 @@ def evaluate_RNAformer(model, test_sets, eval_synthetic=False, eval_bprna=False)
                 #     pdb_sample = torch.FloatTensor([[1]]).to(device)
                 pdb_sample = torch.FloatTensor([[1]]).to(device)
                 logits, pair_mask = model(sequence, src_len, pdb_sample)
+                # print(logits, "logits checkup...")
 
                 pred_mat = torch.sigmoid(logits[0, :, :, -1]) > 0.5
                 true_mat = sample['trg_mat'].float().to(device)
@@ -228,13 +229,13 @@ if __name__ == '__main__':
     else:
         state_dict = torch.load(args.state_dict, map_location=torch.device('cpu'))
 
-    # print(state_dict["state_dict"].keys())
-    model_state_dict = state_dict["module"] #['state_dict']
+    print(state_dict["state_dict"].keys())
+    model_state_dict = state_dict['state_dict'] #["module"]
     # print(model_state_dict)
     # remove prefix "model." from the model_state_dict
     model_state_dict = {k.replace("_forward_module.model.", ""): v for k, v in model_state_dict.items()}
-    # model_state_dict = {k.replace("model.", ""): v for k, v in model_state_dict.items()}
-    model.load_state_dict(model_state_dict, strict=False)
+    model_state_dict = {k.replace("model.", ""): v for k, v in model_state_dict.items()}
+    model.load_state_dict(model_state_dict, strict=True)
     # model.load_state_dict(state_dict, strict=True)
 
     if args.cycling and args.cycling > 0:

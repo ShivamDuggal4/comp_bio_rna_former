@@ -83,6 +83,7 @@ class RiboFormer(nn.Module):
                 n_cycles = n_cycles.item()
             else:
                 n_cycles = self.cycle_steps
+                print('running {} n_cycles'.format(n_cycles))
 
             cyc_latent = torch.zeros_like(pair_latent)
             for n in range(n_cycles - 1):

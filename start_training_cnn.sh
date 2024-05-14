@@ -13,17 +13,32 @@
 # RNAformer.cycling=False
 
 
-CUDA_VISIBLE_DEVICES=1 python3 train_RNAformer.py --config=default_config.yaml experiment.session_name=rna_folding_1 \
+# CUDA_VISIBLE_DEVICES=0 python3 train_RNAformer.py --config=default_config.yaml experiment.session_name=rna_folding_1 \
+# experiment.experiment_name=ts0_conform_dim64_32bit \
+# rna_data.dataframe_path=./datasets/bprna_data.plk \
+# trainer.precision=32 \
+# RNAformer.precision=32 \
+# trainer.devices=1 \
+# rna_data.batch_size=48 \
+# rna_data.batch_by_token_size=False \
+# RNAformer.binary_output=True \
+# rna_data.max_len=100 \
+# experiment.experiments_base_dir=./workspace/experiments_cnn_cycles_retry_2 \
+# RNAformer.cycling=6 
+# # \
+# # resume_training=True \
+# # trainer.resume_from_checkpoint=/data/vision/torralba/sduggal/course_work/bio_course_hw/project/RNAProject-self/workspace/experiments_cnn_cycles/RNAformer/rna_folding_1/ts0_conform_dim64_32bit-017/checkpoint-09-4110.0.ckpt
+
+
+CUDA_VISIBLE_DEVICES=2 python3 train_RNAformer.py --config=default_config.yaml experiment.session_name=rna_folding_1 \
 experiment.experiment_name=ts0_conform_dim64_32bit \
 rna_data.dataframe_path=./datasets/bprna_data.plk \
 trainer.precision=32 \
 RNAformer.precision=32 \
 trainer.devices=1 \
-rna_data.batch_size=48 \
+rna_data.batch_size=32 \
 rna_data.batch_by_token_size=False \
 RNAformer.binary_output=True \
 rna_data.max_len=100 \
-experiment.experiments_base_dir=./workspace/experiments_cnn_cycles \
-RNAformer.cycling=6 \
-resume_training=True \
-trainer.resume_from_checkpoint=/data/vision/torralba/sduggal/course_work/bio_course_hw/project/RNAProject-self/workspace/experiments_cnn_cycles/RNAformer/rna_folding_1/ts0_conform_dim64_32bit-017/checkpoint-09-4110.0.ckpt
+experiment.experiments_base_dir=./workspace/experiments_cnn_moe \
+RNAformer.cycling=6 

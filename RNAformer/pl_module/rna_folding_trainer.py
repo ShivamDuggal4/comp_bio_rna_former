@@ -3,9 +3,10 @@ import pytorch_lightning as pl
 import torch
 import inspect
 
-#from RNAformer.model.RNAformer import RiboFormer
-#from RNAformer.model.RNAformer_cnn import RiboFormer
-from RNAformer.model.RNAformer_transformer import RiboFormer
+# from RNAformer.model.RNAformer import RiboFormer
+from RNAformer.model.RNAformer_cnn import RiboFormer
+# from RNAformer.model.RNAformer_cnn_moe import RiboFormer
+# from RNAformer.model.RNAformer_transformer import RiboFormer
 from RNAformer.utils import instantiate
 from RNAformer.utils.group_parameters import group_parameters_for_optimizer
 from RNAformer.utils.optim.lr_schedule import get_learning_rate_schedule
@@ -74,12 +75,18 @@ class RNAFoldingTrainer(pl.LightningModule):
         else:
             max_cycle = 0
 
+        # print('max_cycle is: ', max_cycle)
+        # logits_mat, mask, router_prob = self.model(batch['src_seq'], batch['length'], batch['pdb_sample'], max_cycle=max_cycle)
         logits_mat, mask = self.model(batch['src_seq'], batch['length'], batch['pdb_sample'], max_cycle=max_cycle)
+
 
         pred = logits_mat[batch['mask']][:, 0]
         target = batch['trg_mat'][batch['mask']].float()
         # print(pred.shape, pred.min(), pred.max(), target.shape, target.min(), target.max(), "pred shape/min/max | target shape/min/max")
         loss = self.loss_train(pred, target)
+        # router_entropy = torch.sum(router_prob * torch.log(router_prob + 1e-8), dim=1)
+        # router_entropy = router_entropy.mean()
+        
         # logging.info("batch['src_seq'] 0: {}".format(batch['src_seq'].shape))
         # logging.info("batch['mask'] 0: {}".format(batch['mask'].shape))
         # logging.info("pred.shape 0: {}".format(pred.shape))
@@ -89,8 +96,10 @@ class RNAFoldingTrainer(pl.LightningModule):
         loss = loss[~torch.isnan(loss)]
         # logging.info("self.loss.shape 1: {}".format(loss.shape))
         # self.log("loss.shape", loss.shape, on_step=True, on_epoch=False,)
-        loss = torch.mean(loss)
-
+        loss_general = torch.mean(loss)
+        # loss = loss_general + 0.00001 * router_entropy
+        loss = loss_general
+        
         # self.log("target.min", target.min(), on_step=True, on_epoch=False,)
         # self.log("target.max", target.max(), on_step=True, on_epoch=False,)
         # self.log("pred.min", pred.min(), on_step=True, on_epoch=False,)
@@ -98,12 +107,20 @@ class RNAFoldingTrainer(pl.LightningModule):
 
         self.log(
             f"train/loss",
-            loss.detach(),
+            loss_general.detach(),
             on_step=True,
             on_epoch=False,
             prog_bar=True,
             sync_dist=True,
         )
+        # self.log(
+        #     f"train/entropy",
+        #     router_entropy.detach(),
+        #     on_step=True,
+        #     on_epoch=False,
+        #     prog_bar=True,
+        #     sync_dist=True,
+        # )
 
         self.log("global_step", torch.FloatTensor([self.global_step]))
 
